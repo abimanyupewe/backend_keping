@@ -132,7 +132,11 @@ APP_ENV=development
 PORT=8080
 GIN_MODE=debug
 
-# Database (Supabase PostgreSQL)
+# Supabase Configuration
+SUPABASE_URL="https://your_supabase_project_ref.supabase.co"
+SUPABASE_ANON_KEY="your_supabase_anon_key_here"
+SUPABASE_SERVICE_ROLE_KEY="your_supabase_service_role_key_here"
+SUPABASE_JWT_SECRET="your_supabase_jwt_secret_here"
 DB_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require"
 
 # File Storage (Cloudinary)
@@ -145,7 +149,7 @@ CLOUDINARY_FOLDER="receipts"
 GEMINI_API_KEY="your_gemini_api_key_here"
 GEMINI_MODEL="your_gemini_model_here"
 
-# Auth & Security
+# Security & Ingestion
 JWT_SECRET="your_jwt_secret_64_character_hex_here"
 JWT_EXPIRATION_HOURS="your_jwt_expiration_hours_here"
 INGESTION_SECRET_KEY="your_ingestion_secret_key_here"

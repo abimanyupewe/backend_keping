@@ -28,7 +28,7 @@ func main() {
 	port := getEnv("PORT", "8080")
 
 	dbURL := getEnv("DB_URL", os.Getenv("DATABASE_URL"))
-	jwtSecret := getEnv("JWT_SECRET", os.Getenv("SUPABASE_JWT_SECRET"))
+	jwtSecret := getEnv("SUPABASE_JWT_SECRET", os.Getenv("JWT_SECRET"))
 	ingestionSecret := getEnv("INGESTION_SECRET_KEY", "keping-super-secret-ingestion-key-2026")
 
 	geminiAPIKey := os.Getenv("GEMINI_API_KEY")
