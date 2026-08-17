@@ -1,0 +1,19 @@
+# Environment variables
+.env
+
+# Binary outputs
+/api
+/main
+*.exe
+*.exe;
+*.dll
+*.so
+*.dylib
+
+# Test artifacts
+*.out
+
+# IDE & OS files
+.DS_Store
+.vscode/
+.idea/

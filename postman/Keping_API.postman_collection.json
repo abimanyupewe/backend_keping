@@ -1,0 +1,309 @@
+{
+	"info": {
+		"_postman_id": "a8f7652e-9d21-432a-8742-keping-backend-v1",
+		"name": "Keping API",
+		"description": "Postman Collection resmi untuk pengujian REST API Keping (Financial Tracker Backend).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "bearer_token",
+			"value": "your-supabase-jwt-token-here",
+			"type": "string"
+		},
+		{
+			"key": "ingestion_secret",
+			"value": "keping-super-secret-ingestion-key-2026",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "1. Health Check Ping",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Keep-alive ping endpoint untuk mengecek status API server dan koneksi Supabase DB."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Ingestion Engine",
+			"item": [
+				{
+					"name": "2a. Ingest Notification - DANA Top Up (Income)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Ingestion-Secret",
+								"value": "{{ingestion_secret}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"package_name\": \"id.dana\",\n  \"title\": \"Isi Saldo Berhasil\",\n  \"content\": \"Kamu telah berhasil melakukan isi saldo sebesar Rp500.000 via BRI\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ingest/notification",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ingest",
+								"notification"
+							]
+						},
+						"description": "Simulasi notifikasi DANA masuk (CREDIT). Memicu kalkulator auto-save wishlist secara otomatis."
+					},
+					"response": []
+				},
+				{
+					"name": "2b. Ingest Notification - BRImo Transfer Masuk (Income)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Ingestion-Secret",
+								"value": "{{ingestion_secret}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"package_name\": \"id.co.bri.brimo\",\n  \"title\": \"Notifikasi Transaksi\",\n  \"content\": \"Dana Kredit masuk sebesar Rp1.500.000 dari REKENING XXX\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ingest/notification",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ingest",
+								"notification"
+							]
+						},
+						"description": "Simulasi notifikasi transfer masuk BRImo (CREDIT)."
+					},
+					"response": []
+				},
+				{
+					"name": "2c. Ingest Notification - DANA QRIS (Expense)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Ingestion-Secret",
+								"value": "{{ingestion_secret}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"package_name\": \"id.dana\",\n  \"title\": \"Pembayaran Berhasil\",\n  \"content\": \"Pembayaran sebesar Rp25.000 ke Kopi Kenangan telah berhasil\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ingest/notification",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ingest",
+								"notification"
+							]
+						},
+						"description": "Simulasi notifikasi pembayaran QRIS (DEBIT)."
+					},
+					"response": []
+				},
+				{
+					"name": "2d. Ingest OCR Receipt Scan (Gemini Vision API)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Ingestion-Secret",
+								"value": "{{ingestion_secret}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "receipt",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/ingest/scan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ingest",
+								"scan"
+							]
+						},
+						"description": "Upload foto struk/bukti transfer untuk dibaca secara otomatis oleh Google Gemini 1.5 Flash Vision API."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transactions",
+			"item": [
+				{
+					"name": "3a. Get Transactions List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/transactions?limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "Mengambil riwayat transaksi user."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Wishlists",
+			"item": [
+				{
+					"name": "4a. Create Wishlist Target",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Tiket Konser\",\n  \"target_amount\": 1500000,\n  \"auto_save_percentage\": 10,\n  \"icon_name\": \"ticket\",\n  \"label_color\": \"#8E44AD\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/wishlists",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wishlists"
+							]
+						},
+						"description": "Membuat target tabungan wishlist baru dengan persentase alokasi otomatis."
+					},
+					"response": []
+				},
+				{
+					"name": "4b. Get Wishlists List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/wishlists",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wishlists"
+							]
+						},
+						"description": "Mengambil seluruh daftar wishlist dan progress pencapaian tabungan."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
