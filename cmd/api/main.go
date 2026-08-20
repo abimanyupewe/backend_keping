@@ -7,6 +7,7 @@ import (
 
 	deliveryHTTP "backend_keping/internal/delivery/http"
 	"backend_keping/internal/delivery/http/handler"
+	"backend_keping/internal/domain"
 	"backend_keping/internal/repository"
 	"backend_keping/internal/usecase"
 	"backend_keping/pkg/ai"
@@ -51,6 +52,9 @@ func main() {
 			logger.Error("Failed to connect to Supabase PostgreSQL: %v", err)
 		} else {
 			logger.Info("Successfully connected to Supabase PostgreSQL Database")
+			if err := db.AutoMigrate(&domain.User{}, &domain.Transaction{}, &domain.Wishlist{}); err != nil {
+				logger.Error("Failed to auto-migrate database schemas: %v", err)
+			}
 		}
 	} else {
 		logger.Info("DB_URL/DATABASE_URL not set. Running in dry-run mode.")
@@ -68,6 +72,7 @@ func main() {
 	geminiClient := ai.NewGeminiClient(geminiAPIKey, geminiModel)
 
 	// Initialize Repositories
+	userRepo := repository.NewUserRepository(db)
 	txRepo := repository.NewTransactionRepository(db)
 	wishRepo := repository.NewWishlistRepository(db)
 
@@ -75,12 +80,14 @@ func main() {
 	regexParser := usecase.NewRegexParser()
 	autoSaveCalc := usecase.NewAutoSaveCalculator()
 
+	authUsecase := usecase.NewAuthUsecase(userRepo, jwtSecret)
 	ingestUsecase := usecase.NewIngestUsecase(txRepo, wishRepo, regexParser, autoSaveCalc, geminiClient, cldService)
 	txUsecase := usecase.NewTransactionUsecase(txRepo)
 	wishUsecase := usecase.NewWishlistUsecase(wishRepo)
 
 	// Initialize Handlers
 	healthHandler := handler.NewHealthHandler(db)
+	authHandler := handler.NewAuthHandler(authUsecase)
 	ingestHandler := handler.NewIngestHandler(ingestUsecase)
 	txHandler := handler.NewTransactionHandler(txUsecase)
 	wishHandler := handler.NewWishlistHandler(wishUsecase)
@@ -89,14 +96,15 @@ func main() {
 	r := gin.Default()
 
 	deliveryHTTP.SetupRouter(deliveryHTTP.RouterConfig{
-		Engine:              r,
-		HealthHandler:       healthHandler,
-		IngestHandler:       ingestHandler,
-		TxHandler:           txHandler,
-		WishlistHandler:     wishHandler,
-		SupabaseJWTSecret:   jwtSecret,
+		Engine:             r,
+		HealthHandler:      healthHandler,
+		AuthHandler:        authHandler,
+		IngestHandler:      ingestHandler,
+		TxHandler:          txHandler,
+		WishlistHandler:    wishHandler,
+		SupabaseJWTSecret:  jwtSecret,
 		IngestionSecretKey: ingestionSecret,
-		RateLimitRPS:        rateLimitRPS,
+		RateLimitRPS:       rateLimitRPS,
 	})
 
 	logger.Info("Keping Backend Server starting on port :%s ...", port)

@@ -9,14 +9,15 @@ import (
 )
 
 type RouterConfig struct {
-	Engine              *gin.Engine
-	HealthHandler       *handler.HealthHandler
-	IngestHandler       *handler.IngestHandler
-	TxHandler           *handler.TransactionHandler
-	WishlistHandler     *handler.WishlistHandler
-	SupabaseJWTSecret   string
+	Engine             *gin.Engine
+	HealthHandler      *handler.HealthHandler
+	AuthHandler        *handler.AuthHandler
+	IngestHandler      *handler.IngestHandler
+	TxHandler          *handler.TransactionHandler
+	WishlistHandler    *handler.WishlistHandler
+	SupabaseJWTSecret  string
 	IngestionSecretKey string
-	RateLimitRPS        int
+	RateLimitRPS       int
 }
 
 func SetupRouter(cfg RouterConfig) {
@@ -36,6 +37,15 @@ func SetupRouter(cfg RouterConfig) {
 	{
 		// Infrastructure / Health Check Endpoint (Public)
 		v1.GET("/health", cfg.HealthHandler.Check)
+
+		// Public Auth Endpoints (Register & Login)
+		if cfg.AuthHandler != nil {
+			authPublic := v1.Group("/auth")
+			{
+				authPublic.POST("/register", cfg.AuthHandler.Register)
+				authPublic.POST("/login", cfg.AuthHandler.Login)
+			}
+		}
 
 		// Notification Ingest Endpoint (Protected via INGESTION_SECRET_KEY & Supabase JWT)
 		ingest := v1.Group("/ingest")
